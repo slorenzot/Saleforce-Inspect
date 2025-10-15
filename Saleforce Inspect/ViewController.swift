@@ -5,7 +5,7 @@
 //  Created by Soulberto Lorenzo on 14/10/25.
 //
 
-import Cocoa
+//import Cocoa≥
 import SafariServices
 import WebKit
 

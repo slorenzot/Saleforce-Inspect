@@ -18,11 +18,6 @@ p {
     min-width: 320px;
 }
 
-.popup-signup-features-title {
-    margin-left: 20px;
-    text-align: left;
-    font-size: 14px;
-}
 
 .popup-signup-features-missing {
     text-align: left;
@@ -37,13 +32,18 @@ p {
 }
 
 .popup-signup-features {
-    margin-left: 30px;
+    margin-left: 10px;
     text-align: left;
-    font-size: 12px;
+    font-size: 14px;
+}
+
+.popup-signup-features-title {
+    margin-left: 10px;
+    text-align: left;
 }
 
 .popup-signup-features-item {
-    margin-top: 12px;
+    margin-top: 6px;
 }
 
 .popup-signup-button {
@@ -57,6 +57,10 @@ p {
 
 .popup-signup-hint {
     font-size: 11px;
+}
+
+.popup-signup-signin {
+    text-decoration: bold;
 }
 
 @media (prefers-color-scheme: dark) {

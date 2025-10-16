@@ -21,7 +21,12 @@
 
     "content_scripts": [{
         "js": [ "content.js" ],
-        "matches": [ "*://example.com/*" ]
+        "matches": [
+            "*://example.com/*",
+            "*://test.salesforce.com/*",
+            "*://login.salesforce.com/*",
+            "*://*.force.com/*"
+        ]
     }],
 
     "action": {

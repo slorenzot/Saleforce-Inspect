@@ -1,0 +1,10 @@
+{
+    "extension_name": {
+        "message": "Saleforce Inspect Extension",
+        "description": "The display name for the extension."
+    },
+    "extension_description": {
+        "message": "Esta es la extensión Salesforce Inpect. You should tell us what your extension does here.",
+        "description": "Description of what the extension does."
+    }
+}

@@ -18,6 +18,10 @@ p {
     min-width: 320px;
 }
 
+.popup-logo {
+    text-align: center;
+}
+
 
 .popup-signup-features-missing {
     text-align: left;

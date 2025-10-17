@@ -1,3 +1,5 @@
+console.log('Loded Script.js');
+
 function show(enabled, useSettingsInsteadOfPreferences) {
     if (useSettingsInsteadOfPreferences) {
         document.getElementsByClassName('state-on')[0].innerText = "Saleforce Inspect’s extension is currently on. You can turn it off in the Extensions section of Safari Settings.";

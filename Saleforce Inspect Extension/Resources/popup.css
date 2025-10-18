@@ -71,3 +71,18 @@ p {
 @media (prefers-color-scheme: dark) {
     /* Dark Mode styles go here. */
 }
+
+/* En popup.css */
+    .dark-mode-toggle-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 20px;
+        padding-top: 10px;
+        border-top: 1px solid #eee;
+    }
+
+    .dark-mode-toggle-container label {
+        margin-right: 10px;
+        font-weight: normal; /* O ajusta a tu estilo */
+    }

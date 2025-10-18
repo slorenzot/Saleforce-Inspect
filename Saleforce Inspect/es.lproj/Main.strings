@@ -1,0 +1,36 @@
+
+/* Class = "NSMenuItem"; title = "Saleforce Inspect"; ObjectID = "1Xt-HY-uBw"; */
+"1Xt-HY-uBw.title" = "Saleforce Inspect";
+
+/* Class = "NSMenuItem"; title = "Quit Saleforce Inspect"; ObjectID = "4sb-4s-VLi"; */
+"4sb-4s-VLi.title" = "Quit Saleforce Inspect";
+
+/* Class = "NSMenuItem"; title = "About Saleforce Inspect"; ObjectID = "5kV-Vb-QxS"; */
+"5kV-Vb-QxS.title" = "About Saleforce Inspect";
+
+/* Class = "NSMenu"; title = "Main Menu"; ObjectID = "AYu-sK-qS6"; */
+"AYu-sK-qS6.title" = "Main Menu";
+
+/* Class = "NSMenu"; title = "Help"; ObjectID = "F2S-fz-NVQ"; */
+"F2S-fz-NVQ.title" = "Help";
+
+/* Class = "NSMenuItem"; title = "Saleforce Inspect Help"; ObjectID = "FKE-Sm-Kum"; */
+"FKE-Sm-Kum.title" = "Saleforce Inspect Help";
+
+/* Class = "NSWindow"; title = "Saleforce Inspect"; ObjectID = "IQv-IB-iLA"; */
+"IQv-IB-iLA.title" = "Saleforce Inspect";
+
+/* Class = "NSMenuItem"; title = "Show All"; ObjectID = "Kd2-mp-pUS"; */
+"Kd2-mp-pUS.title" = "Show All";
+
+/* Class = "NSMenuItem"; title = "Hide Saleforce Inspect"; ObjectID = "Olw-nP-bQN"; */
+"Olw-nP-bQN.title" = "Hide Saleforce Inspect";
+
+/* Class = "NSMenuItem"; title = "Hide Others"; ObjectID = "Vdr-fp-XzO"; */
+"Vdr-fp-XzO.title" = "Hide Others";
+
+/* Class = "NSMenu"; title = "Saleforce Inspect"; ObjectID = "uQy-DD-JDr"; */
+"uQy-DD-JDr.title" = "Saleforce Inspect";
+
+/* Class = "NSMenuItem"; title = "Help"; ObjectID = "wpr-3q-Mcd"; */
+"wpr-3q-Mcd.title" = "Help";

@@ -22,11 +22,9 @@
     "content_scripts": [{
         "js": [ "content.js" ],
         "matches": [
-            "*://example.com/*",
-            "*://test.salesforce.com/*",
-            "*://login.salesforce.com/*",
-            "*://*.force.com/*"
-        ]
+            "<all_urls>"
+        ],
+        "run_at": "document_end"
     }],
 
     "action": {
@@ -34,5 +32,7 @@
         "default_icon": "images/toolbar-icon.svg"
     },
 
-    "permissions": [ ]
+    "permissions": [
+        "<all_urls>"
+    ]
 }

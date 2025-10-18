@@ -5,7 +5,8 @@
 body {
     width: 320px;
     padding: 10px;
-
+    
+    background-color: #454444;
     font-family: system-ui;
     text-align: center;
 }

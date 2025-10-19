@@ -1,7 +1,7 @@
 console.log('Loaded popup.js');
 
-const signInButton = document.getElementById("sign_in_button");
-const darkModeToggle = document.getElementById("darkModeToggle"); // Referencia al nuevo switch
+const signInButton = document.getElementById("#sign_in_button");
+const darkModeToggle = document.getElementById("#dark_mode_toggle"); // Referencia al nuevo switch
 
 if (signInButton) {
     signInButton.addEventListener('click', function() {

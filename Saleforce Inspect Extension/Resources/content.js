@@ -1,6 +1,15 @@
 const PREFIX = "SF Inspect";
 const DARK_MODE_STYLE_ID = 'salesforce-inspect-dark-mode-style';
 
+// Nuevas constantes para el panel del inspector
+const INSPECTOR_PANEL_WIDTH = 300; // Ancho del panel del inspector
+const INSPECTOR_HANDLE_WIDTH = 20; // Ancho del handle clicable
+const INSPECTOR_PANEL_ID = 'salesforce-inspector-panel';
+const INSPECTOR_HANDLE_ID = 'salesforce-inspector-panel-handle';
+
+// Variable global para el estado de visibilidad del panel del inspector
+let isInspectorPanelOpen = false;
+
 function print(messge) {
     console.log(PREFIX + ": ", messge);
 }
@@ -104,13 +113,12 @@ function applyDarkMode() {
         img, video, picture {
             filter: invert(1) hue-rotate(180deg);
         }
-        /* Si hay elementos que no quieres invertir, añádelos aquí. Ej: */
-        #salesforce-inspect-footer { /* Asegura que el footer no sea invertido */
-            filter: none;
-        }
-        /* Asegura que el panel inspector y su contenido no sean invertidos */
-        #inspector-inspect-panel,
-        #inspector-inspect-panel * { /* CORREGIDO: Eliminado #inspector-container */
+        /* Asegura que el footer, el panel inspector y su handle no sean invertidos */
+        #salesforce-inspect-footer,
+        #${INSPECTOR_PANEL_ID},
+        #${INSPECTOR_PANEL_ID} *,
+        #${INSPECTOR_HANDLE_ID},
+        #${INSPECTOR_HANDLE_ID} * {
             filter: none;
         }
     `;
@@ -161,7 +169,7 @@ function addApplicationFooter() {
     footer.style.textAlign = 'center';
     //footer.style.margin = '10px 0;
     footer.style.padding = '10px 0';
-    footer.style.zIndex = '1000'; // Ensure it's on top of most content
+    footer.style.zIndex = '998'; // Asegura que esté por debajo del inspector
     footer.style.fontSize = '14px';
     footer.style.fontFamily = 'sans-serif';
     footer.style.boxSizing = 'border-box'; // Para asegurar que el padding no afecte el ancho.
@@ -304,45 +312,109 @@ function onContentLoaded(event) {
 //     }
 }
 
+// Function to toggle the panel visibility
+function toggleInspectorPanel() {
+    const inspectorPanel = document.getElementById(INSPECTOR_PANEL_ID);
+    const panelHandle = document.getElementById(INSPECTOR_HANDLE_ID);
+
+    if (!inspectorPanel || !panelHandle) {
+        error("Inspector panel or handle not found for toggling.");
+        return;
+    }
+
+    const handleArrow = panelHandle.querySelector('span');
+
+    if (isInspectorPanelOpen) {
+        // Cierra el panel
+        inspectorPanel.style.right = `-${INSPECTOR_PANEL_WIDTH}px`;
+        panelHandle.style.right = '0'; // El handle permanece en el borde derecho
+        if (handleArrow) {
+            handleArrow.innerHTML = '&#9664;'; // Flecha apunta a la izquierda para abrir
+        }
+    } else {
+        // Abre el panel
+        inspectorPanel.style.right = '0';
+        panelHandle.style.right = `${INSPECTOR_PANEL_WIDTH}px`; // El handle se mueve con el panel
+        if (handleArrow) {
+            handleArrow.innerHTML = '&#9654;'; // Flecha apunta a la derecha para cerrar
+        }
+    }
+    isInspectorPanelOpen = !isInspectorPanelOpen;
+}
+
 // Add a method to create the floating inspector panel
-function createInspectorPanel() { // CORREGIDO: Ya no necesita bodyElement como argumento
+function createInspectorPanel() {
     // Check if inspector panel already exists to prevent duplicates
-    if (document.getElementById('inspector-inspect-panel')) {
+    if (document.getElementById(INSPECTOR_PANEL_ID)) {
         print("Inspector panel already added to the page.");
         return;
     }
 
+    // 1. Crea el panel principal del inspector
     const inspectorPanel = document.createElement('div');
-    
-    inspectorPanel.id = 'inspector-inspect-panel';
-    inspectorPanel.style.position = 'fixed'; // Make it floating
+    inspectorPanel.id = INSPECTOR_PANEL_ID;
+    inspectorPanel.style.position = 'fixed'; // Hazlo flotante
     inspectorPanel.style.top = '0';
-    inspectorPanel.style.right = '0';
-    inspectorPanel.style.width = '300px'; // Example fixed width for the inspector
-    inspectorPanel.style.height = '100vh'; // Take full height of viewport
-    inspectorPanel.style.backgroundColor = '#f0f0f0'; // Light grey background for the inspector
+    inspectorPanel.style.right = `-${INSPECTOR_PANEL_WIDTH}px`; // Inicialmente oculto fuera de la pantalla
+    inspectorPanel.style.width = `${INSPECTOR_PANEL_WIDTH}px`;
+    inspectorPanel.style.height = '100vh'; // Toma la altura completa de la ventana
+    inspectorPanel.style.backgroundColor = '#f0f0f0'; // Fondo gris claro
     inspectorPanel.style.display = 'flex';
     inspectorPanel.style.flexDirection = 'column';
     inspectorPanel.style.alignItems = 'center';
-    inspectorPanel.style.borderLeft = '1px solid #ccc';
-    inspectorPanel.style.boxSizing = 'border-box'; // Ensure padding/border doesn't affect width
+    inspectorPanel.style.boxSizing = 'border-box'; // Asegura que el padding/border no afecte el ancho
     inspectorPanel.style.padding = '10px';
-    inspectorPanel.style.zIndex = '999'; // Higher z-index to be on top of everything, including footer
+    inspectorPanel.style.zIndex = '1000'; // Mayor z-index para estar por encima de todo
+    inspectorPanel.style.transition = 'right 0.3s ease-in-out'; // Transición suave
 
-    // Add a header to the inspector panel
+    // Agrega un encabezado al panel
     const header = document.createElement('h1');
     header.textContent = 'Inspector';
     header.style.margin = '10px 0';
-    header.style.color = '#333'; // Text color for inspector header
+    header.style.color = '#333'; // Color de texto
     inspectorPanel.appendChild(header);
     
-    const body = document.createElement('div');
-    body.textContent = '${}';
+    // Contenido del cuerpo del panel
+    const bodyContent = document.createElement('div');
+    bodyContent.textContent = 'Aquí irá el contenido del panel...';
+    bodyContent.style.width = '100%';
+    bodyContent.style.flexGrow = '1';
+    bodyContent.style.overflowY = 'auto'; // Si el contenido es largo, se puede desplazar
+    inspectorPanel.appendChild(bodyContent);
 
-    // Append the inspector panel directly to the body
+    // 2. Crea el "handle" (mango) para el panel del inspector
+    const panelHandle = document.createElement('div');
+    panelHandle.id = INSPECTOR_HANDLE_ID;
+    panelHandle.style.position = 'fixed';
+    panelHandle.style.top = '0';
+    panelHandle.style.right = '0'; // El handle se mantiene en el borde derecho
+    panelHandle.style.width = `${INSPECTOR_HANDLE_WIDTH}px`;
+    panelHandle.style.height = '100vh';
+    panelHandle.style.backgroundColor = '#f0f0f0'; // Coincide con el fondo del panel
+    panelHandle.style.borderLeft = '1px solid #ccc'; // El borde izquierdo solicitado
+    panelHandle.style.cursor = 'pointer'; // Indica que es clicable
+    panelHandle.style.zIndex = '999'; // Por encima del footer, pero debajo del panel principal
+    panelHandle.style.transition = 'right 0.3s ease-in-out'; // Para que se mueva con el panel
+
+    // Agrega un indicador visual (flecha) al handle
+    const handleArrow = document.createElement('span');
+    handleArrow.innerHTML = '&#9664;'; // Flecha inicial apuntando a la izquierda (para abrir)
+    handleArrow.style.position = 'absolute';
+    handleArrow.style.top = '50%';
+    handleArrow.style.left = '50%';
+    handleArrow.style.transform = 'translate(-50%, -50%)';
+    handleArrow.style.color = '#555';
+    handleArrow.style.fontSize = '18px';
+    panelHandle.appendChild(handleArrow);
+
+    // 3. Añade ambos elementos al cuerpo del documento
     document.body.appendChild(inspectorPanel);
+    document.body.appendChild(panelHandle);
+
+    // 4. Agrega el event listener al handle
+    panelHandle.addEventListener('click', toggleInspectorPanel);
     
-    print("Added floating Inspector Panel...");
+    print("Added floating Inspector Panel and Handle...");
 }
 
 if (document.readyState === "loading") {

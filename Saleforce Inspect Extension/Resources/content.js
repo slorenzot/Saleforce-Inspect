@@ -83,7 +83,7 @@ function parseLocation(href) {
         }
         
         return {
-            sObjet: matches[1],
+            sObject: matches[1],
             id: matches[2]
         }
     } catch(err) {
@@ -349,77 +349,83 @@ function toggleInspectorPanel() {
 
 // Add a method to create the floating inspector panel
 function createInspectorPanel() {
-    // Check if inspector panel already exists to prevent duplicates
-    if (document.getElementById(INSPECTOR_PANEL_ID)) {
-        print("Inspector panel already added to the page.");
-        return;
+    try {
+        // Check if inspector panel already exists to prevent duplicates
+        if (document.getElementById(INSPECTOR_PANEL_ID)) {
+            print("Inspector panel already added to the page.");
+            return;
+        }
+
+        // 1. Crea el panel principal del inspector
+        const inspectorPanel = document.createElement('div');
+        inspectorPanel.id = INSPECTOR_PANEL_ID;
+        inspectorPanel.style.position = 'fixed'; // Hazlo flotante
+        inspectorPanel.style.top = '0';
+        inspectorPanel.style.right = `-${INSPECTOR_PANEL_WIDTH}px`; // Inicialmente oculto fuera de la pantalla
+        inspectorPanel.style.width = `${INSPECTOR_PANEL_WIDTH}px`;
+        inspectorPanel.style.height = '100vh'; // Toma la altura completa de la ventana
+        inspectorPanel.style.backgroundColor = '#f0f0f0'; // Fondo gris claro
+        inspectorPanel.style.display = 'flex';
+        inspectorPanel.style.flexDirection = 'column';
+        inspectorPanel.style.alignItems = 'center';
+        inspectorPanel.style.boxSizing = 'border-box'; // Asegura que el padding/border no afecte el ancho
+        inspectorPanel.style.padding = '10px';
+        inspectorPanel.style.zIndex = '1000'; // Mayor z-index para estar por encima de todo
+        inspectorPanel.style.transition = 'right 0.3s ease-in-out'; // Transición suave
+
+        // Agrega un encabezado al panel
+        const header = document.createElement('h1');
+        header.textContent = 'Inspector';
+        header.style.margin = '10px 0';
+        header.style.color = '#333'; // Color de texto
+        inspectorPanel.appendChild(header);
+        
+//        const sObject = parseLocation(document.location.href);
+        
+        // Contenido del cuerpo del panel
+        const bodyContent = document.createElement('div');
+        bodyContent.textContent = 'Instance URL:' + document.location.href;
+        bodyContent.style.width = '100%';
+        bodyContent.style.flexGrow = '1';
+        bodyContent.style.overflowY = 'auto'; // Si el contenido es largo, se puede desplazar
+        inspectorPanel.appendChild(bodyContent);
+
+        // 2. Crea el "handle" (mango) para el panel del inspector
+        const panelHandle = document.createElement('div');
+        panelHandle.id = INSPECTOR_HANDLE_ID;
+        panelHandle.style.position = 'fixed';
+        panelHandle.style.top = '0';
+        panelHandle.style.right = '0'; // El handle se mantiene en el borde derecho
+        panelHandle.style.width = `${INSPECTOR_HANDLE_WIDTH}px`;
+        panelHandle.style.height = '100vh';
+        panelHandle.style.backgroundColor = '#f0f0f0'; // Coincide con el fondo del panel
+        panelHandle.style.borderLeft = '2px solid #ccc'; // El borde izquierdo solicitado
+        panelHandle.style.cursor = 'pointer'; // Indica que es clicable
+        panelHandle.style.zIndex = '999'; // Por encima del footer, pero debajo del panel principal
+        panelHandle.style.transition = 'right 0.3s ease-in-out'; // Para que se mueva con el panel
+
+        // Agrega un indicador visual (flecha) al handle
+        const handleArrow = document.createElement('span');
+        handleArrow.innerHTML = LEFT_ARROW_ICON; // Flecha inicial apuntando a la izquierda (para abrir)
+        handleArrow.style.position = 'absolute';
+        handleArrow.style.top = '50%';
+        handleArrow.style.left = '50%';
+        handleArrow.style.transform = 'translate(-50%, -50%)';
+        handleArrow.style.color = '#555';
+        handleArrow.style.fontSize = '18px';
+        panelHandle.appendChild(handleArrow);
+
+        // 3. Añade ambos elementos al cuerpo del documento
+        document.body.appendChild(inspectorPanel);
+        document.body.appendChild(panelHandle);
+
+        // 4. Agrega el event listener al handle
+        panelHandle.addEventListener('click', toggleInspectorPanel);
+        
+        print("Added floating Inspector Panel and Handle...");
+    } catch(err) {
+        error(error);
     }
-
-    // 1. Crea el panel principal del inspector
-    const inspectorPanel = document.createElement('div');
-    inspectorPanel.id = INSPECTOR_PANEL_ID;
-    inspectorPanel.style.position = 'fixed'; // Hazlo flotante
-    inspectorPanel.style.top = '0';
-    inspectorPanel.style.right = `-${INSPECTOR_PANEL_WIDTH}px`; // Inicialmente oculto fuera de la pantalla
-    inspectorPanel.style.width = `${INSPECTOR_PANEL_WIDTH}px`;
-    inspectorPanel.style.height = '100vh'; // Toma la altura completa de la ventana
-    inspectorPanel.style.backgroundColor = '#f0f0f0'; // Fondo gris claro
-    inspectorPanel.style.display = 'flex';
-    inspectorPanel.style.flexDirection = 'column';
-    inspectorPanel.style.alignItems = 'center';
-    inspectorPanel.style.boxSizing = 'border-box'; // Asegura que el padding/border no afecte el ancho
-    inspectorPanel.style.padding = '10px';
-    inspectorPanel.style.zIndex = '1000'; // Mayor z-index para estar por encima de todo
-    inspectorPanel.style.transition = 'right 0.3s ease-in-out'; // Transición suave
-
-    // Agrega un encabezado al panel
-    const header = document.createElement('h1');
-    header.textContent = 'Inspector';
-    header.style.margin = '10px 0';
-    header.style.color = '#333'; // Color de texto
-    inspectorPanel.appendChild(header);
-    
-    // Contenido del cuerpo del panel
-    const bodyContent = document.createElement('div');
-    bodyContent.textContent = 'Aquí irá el contenido del panel...';
-    bodyContent.style.width = '100%';
-    bodyContent.style.flexGrow = '1';
-    bodyContent.style.overflowY = 'auto'; // Si el contenido es largo, se puede desplazar
-    inspectorPanel.appendChild(bodyContent);
-
-    // 2. Crea el "handle" (mango) para el panel del inspector
-    const panelHandle = document.createElement('div');
-    panelHandle.id = INSPECTOR_HANDLE_ID;
-    panelHandle.style.position = 'fixed';
-    panelHandle.style.top = '0';
-    panelHandle.style.right = '0'; // El handle se mantiene en el borde derecho
-    panelHandle.style.width = `${INSPECTOR_HANDLE_WIDTH}px`;
-    panelHandle.style.height = '100vh';
-    panelHandle.style.backgroundColor = '#f0f0f0'; // Coincide con el fondo del panel
-    panelHandle.style.borderLeft = '1px solid #ccc'; // El borde izquierdo solicitado
-    panelHandle.style.cursor = 'pointer'; // Indica que es clicable
-    panelHandle.style.zIndex = '999'; // Por encima del footer, pero debajo del panel principal
-    panelHandle.style.transition = 'right 0.3s ease-in-out'; // Para que se mueva con el panel
-
-    // Agrega un indicador visual (flecha) al handle
-    const handleArrow = document.createElement('span');
-    handleArrow.innerHTML = LEFT_ARROW_ICON; // Flecha inicial apuntando a la izquierda (para abrir)
-    handleArrow.style.position = 'absolute';
-    handleArrow.style.top = '50%';
-    handleArrow.style.left = '50%';
-    handleArrow.style.transform = 'translate(-50%, -50%)';
-    handleArrow.style.color = '#555';
-    handleArrow.style.fontSize = '18px';
-    panelHandle.appendChild(handleArrow);
-
-    // 3. Añade ambos elementos al cuerpo del documento
-    document.body.appendChild(inspectorPanel);
-    document.body.appendChild(panelHandle);
-
-    // 4. Agrega el event listener al handle
-    panelHandle.addEventListener('click', toggleInspectorPanel);
-    
-    print("Added floating Inspector Panel and Handle...");
 }
 
 if (document.readyState === "loading") {
@@ -429,7 +435,7 @@ if (document.readyState === "loading") {
 }
 
 if (document.readyState === "interactive") {
-    print("Redy State = Interactive");
+    print("Ready State = Interactive");
 
     onInteractiveLoaded();
 }
@@ -438,7 +444,7 @@ if (document.readyState === "interactive") {
 document.onreadystatechange = () => {
     switch(document.readyState) {
         case "complete":
-            print("Redy State = Complete");
+            print("Ready State = Complete");
 
             onContentLoaded();
             break;

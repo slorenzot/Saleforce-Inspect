@@ -1,4 +1,5 @@
 const PREFIX = "SF Inspect";
+const DARK_MODE_STYLE_ID = 'salesforce-inspect-dark-mode-style';
 
 function print(messge) {
     console.log(PREFIX + ": ", messge);
@@ -9,8 +10,6 @@ function error(message) {
 }
 
 print('Loaded content.js');
-
-const DARK_MODE_STYLE_ID = 'salesforce-inspect-dark-mode-style';
 
 /**
  * Extrae posibles IDs de objetos de Salesforce del DOM.
@@ -64,7 +63,15 @@ function parseLocation(href) {
     try {
         let matches = href.match(/\/([a-zA-Z0-9]+)\/([a-zA-Z0-9]{15,18})\/view$/);
         
-        return matches
+        if (matches == null) {
+            error('No found Salesorce SObjet and Id on URL...');
+            return null;
+        }
+        
+        return {
+            sObjet: matches[1],
+            id: matches[2]
+        }
     } catch(err) {
         error(err);
     }
@@ -89,16 +96,21 @@ function applyDarkMode() {
     styleElement.textContent = `
         html {
             filter: invert(1) hue-rotate(180deg);
-            background-color: #1F1F1F1F; /* Fondo para evitar blanco puro al invertir */
+            background-color: #F1F1F1; /* Fondo para evitar blanco puro al invertir */
         }
         body {
-            background-color: #333;
+            background-color: #F1F1F1;
         }
         img, video, picture {
             filter: invert(1) hue-rotate(180deg);
         }
         /* Si hay elementos que no quieres invertir, añádelos aquí. Ej: */
-        #salesforce-inspect-footer { /* NUEVO: Asegura que el footer no sea invertido */
+        #salesforce-inspect-footer { /* Asegura que el footer no sea invertido */
+            filter: none;
+        }
+        /* Asegura que el panel inspector y su contenido no sean invertidos */
+        #inspector-inspect-panel,
+        #inspector-inspect-panel * { /* CORREGIDO: Eliminado #inspector-container */
             filter: none;
         }
     `;
@@ -149,9 +161,10 @@ function addApplicationFooter() {
     footer.style.textAlign = 'center';
     //footer.style.margin = '10px 0;
     footer.style.padding = '10px 0';
-    footer.style.zIndex = '99999'; // Ensure it's on top of most content
+    footer.style.zIndex = '1000'; // Ensure it's on top of most content
     footer.style.fontSize = '14px';
     footer.style.fontFamily = 'sans-serif';
+    footer.style.boxSizing = 'border-box'; // Para asegurar que el padding no afecte el ancho.
 
     document.body.appendChild(footer);
 
@@ -178,14 +191,18 @@ function removeApplicationFooter() {
 function analyzeSalesforceBundle() {
     print(document);
 
-    applyDarkMode();
+    //applyDarkMode();
 }
 
 function onLoadingStarted() {
+    //applyDarkMode();
+    
     // TODO:
 }
 
 function onInteractiveLoaded() {
+    applyDarkMode();
+    
     // TODO:
 }
 
@@ -271,10 +288,11 @@ function startUrlMonitoring() {
 function onContentLoaded(event) {
     startUrlMonitoring();
     
-    
     analyzeSalesforceBundle();
+    
+    // Call the function to create the inspector panel
+    createInspectorPanel(); // CORREGIDO: Ya no necesita document.body
     addApplicationFooter();
-
 
 //     print('Iniciando búsqueda de IDs de Salesforce...');
 //     const salesforceIds = extractSalesforceObjectIds();
@@ -286,9 +304,49 @@ function onContentLoaded(event) {
 //     }
 }
 
+// Add a method to create the floating inspector panel
+function createInspectorPanel() { // CORREGIDO: Ya no necesita bodyElement como argumento
+    // Check if inspector panel already exists to prevent duplicates
+    if (document.getElementById('inspector-inspect-panel')) {
+        print("Inspector panel already added to the page.");
+        return;
+    }
+
+    const inspectorPanel = document.createElement('div');
+    
+    inspectorPanel.id = 'inspector-inspect-panel';
+    inspectorPanel.style.position = 'fixed'; // Make it floating
+    inspectorPanel.style.top = '0';
+    inspectorPanel.style.right = '0';
+    inspectorPanel.style.width = '300px'; // Example fixed width for the inspector
+    inspectorPanel.style.height = '100vh'; // Take full height of viewport
+    inspectorPanel.style.backgroundColor = '#f0f0f0'; // Light grey background for the inspector
+    inspectorPanel.style.display = 'flex';
+    inspectorPanel.style.flexDirection = 'column';
+    inspectorPanel.style.alignItems = 'center';
+    inspectorPanel.style.borderLeft = '1px solid #ccc';
+    inspectorPanel.style.boxSizing = 'border-box'; // Ensure padding/border doesn't affect width
+    inspectorPanel.style.padding = '10px';
+    inspectorPanel.style.zIndex = '999'; // Higher z-index to be on top of everything, including footer
+
+    // Add a header to the inspector panel
+    const header = document.createElement('h1');
+    header.textContent = 'Inspector';
+    header.style.margin = '10px 0';
+    header.style.color = '#333'; // Text color for inspector header
+    inspectorPanel.appendChild(header);
+    
+    const body = document.createElement('div');
+    body.textContent = '${}';
+
+    // Append the inspector panel directly to the body
+    document.body.appendChild(inspectorPanel);
+    
+    print("Added floating Inspector Panel...");
+}
+
 if (document.readyState === "loading") {
-    print("Redy State = Loading");
-    applyDarkMode();
+    print("Ready State = Loading");
 
     onLoadingStarted();
 }
@@ -315,18 +373,21 @@ document.onreadystatechange = () => {
 browser.storage.local.get('darkModeEnabled').then((result) => {
     print(result);
     if (result.darkModeEnabled) {
-
+        applyDarkMode();
     }
 });
 
 // Escuchar mensajes del popup o background script
 browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
     print("Received request: " + request);
-//    if (request.type === "TOGGLE_DARK_MODE") {
-//        applyDarkMode();
-//        sendResponse({ status: "Modo oscuro aplicado" });
-//    }
-    //applyDarkMode();
+    if (request.type === "TOGGLE_DARK_MODE") {
+        if (isDarkModeEnabled()) {
+            removeDarkMode();
+        } else {
+            applyDarkMode();
+        }
+        sendResponse({ status: "Modo oscuro toggled" });
+    }
     // Si la request es del tipo PAGE_INFO, responder
     if (request.type === "PAGE_INFO") {
          sendResponse({ status: "PAGE_INFO recibido", pageTitle: document.title, pageUrl: window.location.href });
@@ -349,3 +410,4 @@ browser.runtime.sendMessage({ type: "PAGE_INFO", title: pageTitle, url: window.l
     .catch((error) => {
         print("SF DevTools: Error al enviar mensaje a la extensión: " + error);
     });
+

@@ -334,7 +334,7 @@ function onContentLoaded(event) {
 
 class InspectorPanel {
     // Contiene una referencia al nodo padre del panel
-    parentNode = null;
+    #parentNode = null;
     // Variable global para el estado de visibilidad del panel del inspector
     isInspectorPanelOpen = false;
     
@@ -368,7 +368,7 @@ class InspectorPanel {
         this.isInspectorPanelOpen = !this.isInspectorPanelOpen;
     }
     
-    create() {
+    render() {
         try {
             // Check if inspector panel already exists to prevent duplicates
             if (document.getElementById(INSPECTOR_PANEL_ID)) {
@@ -444,8 +444,8 @@ class InspectorPanel {
             panelHandle.appendChild(handleArrow);
 
             // 3. Añade ambos elementos al cuerpo del documento
-            this.parentNode.appendChild(inspectorPanel);
-            this.parentNode.appendChild(panelHandle);
+            this.#parentNode.appendChild(inspectorPanel);
+            this.#parentNode.appendChild(panelHandle);
 
             const self = this;
             // 4. Agrega el event listener al handle
@@ -461,9 +461,9 @@ class InspectorPanel {
     }
     
     inject(container) {
-        this.parentNode = container;
+        this.#parentNode = container;
         
-        this.create();
+        this.render();
     }
 }
 

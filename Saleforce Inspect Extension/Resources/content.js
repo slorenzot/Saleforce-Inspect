@@ -30,9 +30,6 @@ const NEW_WINDOW_ICON = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="ht
     </g>
     </svg>`;
 
-// Variable global para el estado de visibilidad del panel del inspector
-let isInspectorPanelOpen = false;
-
 function print(messge) {
     console.log(PREFIX + ": ", messge);
 }
@@ -232,7 +229,7 @@ function onLoadingStarted() {
 }
 
 function onInteractiveLoaded() {
-    applyDarkMode();
+    //applyDarkMode();
     
     // TODO:
 }
@@ -336,9 +333,13 @@ function onContentLoaded(event) {
 }
 
 class InspectorPanel {
+    // Contiene una referencia al nodo padre del panel
+    parentNode = null;
+    // Variable global para el estado de visibilidad del panel del inspector
+    isInspectorPanelOpen = false;
     
     // Function to toggle the panel visibility
-    toggleInspectorPanel() {
+    toggle() {
         const inspectorPanel = document.getElementById(INSPECTOR_PANEL_ID);
         const panelHandle = document.getElementById(INSPECTOR_HANDLE_ID);
 
@@ -349,7 +350,7 @@ class InspectorPanel {
 
         const handleArrow = panelHandle.querySelector('span');
 
-        if (isInspectorPanelOpen) {
+        if (this.isInspectorPanelOpen) {
             // Cierra el panel
             inspectorPanel.style.right = `-${INSPECTOR_PANEL_WIDTH}px`;
             panelHandle.style.right = '0'; // El handle permanece en el borde derecho
@@ -364,7 +365,7 @@ class InspectorPanel {
                 handleArrow.innerHTML = RIGHT_ARROW_ICON; // Flecha apunta a la derecha para cerrar
             }
         }
-        isInspectorPanelOpen = !isInspectorPanelOpen;
+        this.isInspectorPanelOpen = !this.isInspectorPanelOpen;
     }
     
     create() {
@@ -426,7 +427,7 @@ class InspectorPanel {
             panelHandle.style.width = `${INSPECTOR_HANDLE_WIDTH}px`;
             panelHandle.style.height = '100vh';
             panelHandle.style.backgroundColor = '#f0f0f0'; // Coincide con el fondo del panel
-            panelHandle.style.borderLeft = '2px solid #ccc'; // El borde izquierdo solicitado
+            panelHandle.style.borderLeft = '1px solid #ccc'; // El borde izquierdo solicitado
             panelHandle.style.cursor = 'pointer'; // Indica que es clicable
             panelHandle.style.zIndex = '999'; // Por encima del footer, pero debajo del panel principal
             panelHandle.style.transition = 'right 0.3s ease-in-out'; // Para que se mueva con el panel
@@ -446,10 +447,14 @@ class InspectorPanel {
             this.parentNode.appendChild(inspectorPanel);
             this.parentNode.appendChild(panelHandle);
 
+            const self = this;
             // 4. Agrega el event listener al handle
-            panelHandle.addEventListener('click', this.toggleInspectorPanel);
+            panelHandle.addEventListener('click', function(event) {
+                print("Toggle Inspector Panel");
+                self.toggle();
+            });
             
-            print("Added floating Inspector Panel and Handle...");
+            print("Added floating Inspector Panel and Handler...");
         } catch(err) {
             error(error);
         }
@@ -490,17 +495,19 @@ document.onreadystatechange = () => {
     }
 };
 
+browser.storage.local.set({'darkModeEnabled': true});
 
 // Al cargarse el content script, verificar el estado del modo oscuro y aplicarlo
 browser.storage.local.get('darkModeEnabled').then((result) => {
-    print(result);
+    print(result.darkModeEnabled == true ?? false);
     if (result.darkModeEnabled) {
         applyDarkMode();
     }
 });
 
 // Escuchar mensajes del popup o background script
-browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
+/*
+ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
     print("Received request: " + request);
     if (request.type === "TOGGLE_DARK_MODE") {
         if (isDarkModeEnabled()) {
@@ -517,11 +524,12 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
     // Es importante retornar true si vas a enviar sendResponse de forma asíncrona
     return true;
 });
+*/
 
 // Los siguientes mensajes son de prueba y se pueden mantener o remover
-browser.runtime.sendMessage({ greeting: "hello" }).then((response) => {
+/*browser.runtime.sendMessage({ greeting: "hello" }).then((response) => {
     print("Received response: " + response);
-});
+});*/
 
 const pageTitle = document.title;
 

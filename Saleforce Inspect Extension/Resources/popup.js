@@ -37,6 +37,8 @@ if (darkModeToggle) {
                 }).catch(error => {
                     console.error("Error al enviar mensaje TOGGLE_DARK_MODE: ", error);
                 });
+                // Recargar la pestaña para aplicar los cambios de estilo si es necesario
+                browser.tabs.reload(tab.id);
             });
         });
     });

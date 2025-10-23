@@ -83,6 +83,7 @@ p {
     }
 
     .dark-mode-toggle-container label {
+        font-size: 12px;
         margin-right: 10px;
         font-weight: normal; /* O ajusta a tu estilo */
     }

@@ -40,6 +40,27 @@ function error(message) {
 
 print('Loaded content.js');
 
+class ContentParser {
+    /**
+     * Recorre todos los elementos <a> del documento y reemplaza su atributo href.
+     * @param {string} newHrefText El nuevo texto con el que se reemplazará el href.
+     */
+    static replaceLinksHref(newHrefText) {
+        print(`Searching...`);
+        const allLinks = document.querySelectorAll('a');
+        let replacedCount = 0;
+
+        allLinks.forEach(link => {
+            if (link.hasAttribute('href')) {
+                link.setAttribute('href', newHrefText);
+                replacedCount++;
+            }
+        });
+
+        print(`Se reemplazaron los atributos href de ${replacedCount} enlaces con: "${newHrefText}"`);
+    }
+}
+
 /**
  * Extrae posibles IDs de objetos de Salesforce del DOM.
  * Busca secuencias de 15 o 18 caracteres alfanuméricos en atributos comunes
@@ -314,10 +335,13 @@ function startUrlMonitoring() {
     }
 }
 
+
 function onContentLoaded(event) {
     startUrlMonitoring();
     
     analyzeSalesforceBundle();
+    
+    ContentParser.replaceLinksHref("aaa");
     
     // Call the function to create the inspector panel
     createInspectorPanel(); // CORREGIDO: Ya no necesita document.body
@@ -541,4 +565,3 @@ browser.runtime.sendMessage({ type: "PAGE_INFO", title: pageTitle, url: window.l
     .catch((error) => {
         print("SF DevTools: Error al enviar mensaje a la extensión: " + error);
     });
-

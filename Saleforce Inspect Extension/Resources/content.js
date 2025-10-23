@@ -6,13 +6,15 @@ const INSPECTOR_PANEL_WIDTH = 420; // Ancho del panel del inspector
 const INSPECTOR_HANDLE_WIDTH = 24; // Ancho del handle clicable
 const INSPECTOR_PANEL_ID = 'salesforce-inspector-panel';
 const INSPECTOR_HANDLE_ID = 'salesforce-inspector-panel-handle';
+const ANALYSIS_TOAST_ID = 'salesforce-inspect-analysis-toast'; // Nuevo ID para el toast de análisis
 
 const MOON_ICON = `<svg  style="height: 1em; margin-right: 5px;" class="svg-icon" style="width: 1em; height: 1em;vertical-align: middle;fill: currentColor;overflow: hidden;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"><path d="M524.8 938.666667h-4.266667a439.893333 439.893333 0 0 1-313.173333-134.4 446.293333 446.293333 0 0 1-11.093333-597.333334 432.213333 432.213333 0 0 1 170.666666-116.906666 42.666667 42.666667 0 0 1 45.226667 9.386666 42.666667 42.666667 0 0 1 10.24 42.666667 358.4 358.4 0 0 0 82.773333 375.893333 361.386667 361.386667 0 0 0 376.746667 82.773334 42.666667 42.666667 0 0 1 54.186667 55.04A433.493333 433.493333 0 0 1 836.266667 810.666667a438.613333 438.613333 0 0 1-311.466667 128z" /></svg>`;
 
 const LEFT_ARROW_ICON = `<svg style="transform: rotate(-180deg);" xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="8" height="16" shape-rendering="geometricPrecision" text-rendering="geometricPrecision" image-rendering="optimizeQuality" fill-rule="evenodd" clip-rule="evenodd" viewBox="0 0 298 511.93"><path fill-rule="nonzero" d="M70.77 499.85c-16.24 16.17-42.53 16.09-58.69-.15-16.17-16.25-16.09-42.54.15-58.7l185.5-185.03L12.23 70.93c-16.24-16.16-16.32-42.45-.15-58.7 16.16-16.24 42.45-16.32 58.69-.15l215.15 214.61c16.17 16.25 16.09 42.54-.15 58.7l-215 214.46z"/></svg>`;
+
 const RIGHT_ARROW_ICON = `<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="8" height="16" shape-rendering="geometricPrecision" text-rendering="geometricPrecision" image-rendering="optimizeQuality" fill-rule="evenodd" clip-rule="evenodd" viewBox="0 0 298 511.93"><path fill-rule="nonzero" d="M70.77 499.85c-16.24 16.17-42.53 16.09-58.69-.15-16.17-16.25-16.09-42.54.15-58.7l185.5-185.03L12.23 70.93c-16.24-16.16-16.32-42.45-.15-58.7 16.16-16.24 42.45-16.32 58.69-.15l215.15 214.61c16.17 16.25 16.09 42.54-.15 58.7l-215 214.46z"/></svg>`
 
-const MAXIMIZE_ICON = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Layer_1" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve">
+const MAXIMIZE_ICON = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Layer_1" x="0px" y="0px" width="10" height="10" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve">
     <style type="text/css">
         .st0{fill:#212121;}
     </style>
@@ -21,7 +23,7 @@ const MAXIMIZE_ICON = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http
     </g>
     </svg>`;
 
-const NEW_WINDOW_ICON = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Layer_1" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve">
+const NEW_WINDOW_ICON = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Layer_1" x="0px" y="0px" width="10" height="10" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve">
     <style type="text/css">
         .st0{fill-rule:evenodd;clip-rule:evenodd;fill:#1D1D1D;}
     </style>
@@ -69,14 +71,23 @@ class ContentParser {
         allLinks.forEach(a => {
             // Asumimos que queremos modificar enlaces que terminan en '/view'
             if (a.hasAttribute('href') &&
-                a.href.match(/\/view$/) &&
-                !a.hasAttribute('inspector-role')) {
-                // Comprobar si el prefijo ya está presente para evitar duplicados
-                if (!a.innerHTML.startsWith(innerHTMLPrefix)) {
-                    a.innerHTML = `* ${a.innerHTML}`; // Aplicar el cambio de innerHTML
-                    a.setAttribute('inspector-role', 'button');
-                    
-                    modifiedCount++;
+                a.href.match(/\/view$/)) {
+                
+                if (!a.hasAttribute('inspector-role')) {
+                    switch(a.role) {
+                        case 'tab':
+                            // No aplica para los tabs de Salesforce
+                            break;
+                            
+                        case 'link':
+                        default:
+                            // Todo en
+                        
+                            a.innerHTML = `${NEW_WINDOW_ICON}&nbsp;${a.innerHTML}`; // Aplicar el cambio de innerHTML
+                            a.setAttribute('inspector-role', 'button');
+                            
+                            modifiedCount++;
+                        }
                 }
             }
         });
@@ -339,8 +350,6 @@ function onHandleUrlChange() {
 }
 
 function startUrlMonitoring() {
-//    onHandleUrlChange();
-
     // Agrega listeners para cambios de URL tradicionales (historial del navegador y cambios de hash)
     window.addEventListener('popstate', onHandleUrlChange);
     window.addEventListener('hashchange', onHandleUrlChange);
@@ -377,11 +386,60 @@ function debounce(func, delay) {
     };
 }
 
-// A debounced version of replaceLinksHref that scans the entire document
-const debouncedReplaceLinksHref = debounce(() => {
-    // Pasar 'true' para que `replaceLinksHref` desconecte/reconecte el observador
-    ContentParser.replaceLinksHref("SF Inspect: ", document, true);
-}, 500); // Debounce por 500ms, ajustar según sea necesario
+// *** Nuevas funciones para mostrar y ocultar el Toast ***
+function showAnalysisToast() {
+    print("Showing analysis toast...");
+    let toastElement = document.getElementById(ANALYSIS_TOAST_ID);
+
+    if (!toastElement) {
+        toastElement = document.createElement('div');
+        toastElement.id = ANALYSIS_TOAST_ID;
+        document.body.appendChild(toastElement);
+    }
+
+    toastElement.textContent = 'Salesforce Inspector está analizando el sitio...';
+    toastElement.style.cssText = `
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #4A4A4A; /* Gris oscuro */
+        color: white;
+        padding: 10px 20px;
+        border-radius: 20px; /* Forma de pastilla */
+        font-family: sans-serif;
+        font-size: 14px;
+        z-index: 1001; /* Encima del panel del inspector */
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+        visibility: hidden;
+        white-space: nowrap; /* Evita que el texto se envuelva */
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    `;
+
+    // Forzar el reflow para asegurar que la transición funcione desde el estado inicial
+    void toastElement.offsetWidth; 
+    toastElement.style.opacity = '1';
+    toastElement.style.visibility = 'visible';
+}
+
+function hideAnalysisToast() {
+    print("Hiding analysis toast...");
+    const toastElement = document.getElementById(ANALYSIS_TOAST_ID);
+    if (toastElement) {
+        toastElement.style.opacity = '0';
+        toastElement.style.visibility = 'hidden';
+        // Eliminar el elemento después de que la transición termine
+        toastElement.addEventListener('transitionend', function handler() {
+            if (toastElement.parentNode) {
+                toastElement.parentNode.removeChild(toastElement);
+            }
+            toastElement.removeEventListener('transitionend', handler);
+        }, { once: true });
+    }
+}
+// *** Fin de las nuevas funciones Toast ***
+
 
 function setupLinkReplacementObserver() {
     linkReplacementObserver = new MutationObserver((mutations) => {
@@ -406,11 +464,22 @@ function setupLinkReplacementObserver() {
     print("Iniciado MutationObserver para reemplazo de enlaces.");
 }
 
+// A debounced version of replaceLinksHref that scans the entire document
+const debouncedReplaceLinksHref = debounce(() => {
+    showAnalysisToast(); // Muestra el toast al inicio del análisis
+    // Pasar 'true' para que `replaceLinksHref` desconecte/reconecte el observador
+    ContentParser.replaceLinksHref("SF Inspect: ", document, true);
+    hideAnalysisToast(); // Oculta el toast al finalizar el análisis
+}, 500); // Debounce por 500ms, ajustar según sea necesario
+
 function onContentLoaded(event) {
+    showAnalysisToast();
+    
     startUrlMonitoring();
     
     analyzeSalesforceBundle();
     
+    showAnalysisToast(); // Muestra el toast para la carga inicial
     // Llamada inicial para reemplazar enlaces. Pasar 'true' para gestionar el observador.
     ContentParser.replaceLinksHref("SF Inspect: ", document, true);
     
@@ -639,3 +708,4 @@ browser.runtime.sendMessage({ type: "PAGE_INFO", title: pageTitle, url: window.l
     .catch((error) => {
         print("SF DevTools: Error al enviar mensaje a la extensión: " + error);
     });
+

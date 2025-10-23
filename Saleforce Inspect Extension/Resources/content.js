@@ -124,14 +124,15 @@ function applyDarkMode() {
     // Este es un ejemplo simple que invierte colores.
     styleElement.textContent = `
         html {
-            filter: invert(1) hue-rotate(180deg);
+            filter: invert(1) hue-rotate(180deg); !important
             background-color: #F1F1F1; /* Fondo para evitar blanco puro al invertir */
         }
         body {
             background-color: #F1F1F1;
         }
-        img, video, picture {
-            filter: invert(1) hue-rotate(180deg);
+        /* Para evitar que img, video, picture se inviertan, los re-invertimos */
+        img, video, picture, iframe {
+            filter: invert(1) hue-rotate(180deg) !important;
         }
         /* Asegura que el footer, el panel inspector y su handle no sean invertidos */
         #salesforce-inspect-footer,
@@ -139,7 +140,7 @@ function applyDarkMode() {
         #${INSPECTOR_PANEL_ID} *,
         #${INSPECTOR_HANDLE_ID},
         #${INSPECTOR_HANDLE_ID} * {
-            filter: none;
+            filter: none !important;
         }
     `;
 
@@ -495,7 +496,7 @@ document.onreadystatechange = () => {
     }
 };
 
-browser.storage.local.set({'darkModeEnabled': true});
+//browser.storage.local.set({'darkModeEnabled': true});
 
 // Al cargarse el content script, verificar el estado del modo oscuro y aplicarlo
 browser.storage.local.get('darkModeEnabled').then((result) => {

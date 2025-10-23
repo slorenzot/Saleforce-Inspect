@@ -42,22 +42,31 @@ print('Loaded content.js');
 
 class ContentParser {
     /**
-     * Recorre todos los elementos <a> del documento y reemplaza su atributo href.
+     * Recorre todos los elementos <a> de un elemento raíz o del documento y reemplaza su atributo href.
      * @param {string} newHrefText El nuevo texto con el que se reemplazará el href.
+     * @param {Element} rootElement El elemento dentro del cual se buscarán los enlaces. Si es nulo, se busca en todo el documento.
      */
-    static replaceLinksHref(newHrefText) {
-        print(`Searching...`);
-        const allLinks = document.querySelectorAll('a');
+    static replaceLinksHref(text, rootElement = document) {
+        print(`Searching links within ${rootElement === document ? 'document' : 'specified element'}...`);
+        
+        const allLinks = rootElement.querySelectorAll('a');
         let replacedCount = 0;
 
-        allLinks.forEach(link => {
-            if (link.hasAttribute('href')) {
-                link.setAttribute('href', newHrefText);
+        print("Found links: " + allLinks.length);
+        
+        allLinks.forEach(a => {
+            print(a);
+            if (a.hasAttribute('href') && a.href.match(/\/view$/)) {
+                print("===========================");
+                a.setAttribute('href', a.href);
+                // a.innerHTML = `* ${a.innerHTML}`
                 replacedCount++;
             }
         });
 
-        print(`Se reemplazaron los atributos href de ${replacedCount} enlaces con: "${newHrefText}"`);
+        if (replacedCount > 0) {
+            print(`Se reemplazaron los atributos href de ${replacedCount} enlaces con: "${newHrefText}"`);
+        }
     }
 }
 
@@ -152,7 +161,7 @@ function applyDarkMode() {
             background-color: #F1F1F1;
         }
         /* Para evitar que img, video, picture se inviertan, los re-invertimos */
-        img, video, picture, iframe {
+        img, video, picture /*, iframe */ {
             filter: invert(1) hue-rotate(180deg) !important;
         }
         /* Asegura que el footer, el panel inspector y su handle no sean invertidos */
@@ -335,13 +344,59 @@ function startUrlMonitoring() {
     }
 }
 
+// Debounce function to limit how often a function is called
+function debounce(func, delay) {
+    let timeout;
+    return function(...args) {
+        const context = this;
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(context, args), delay);
+    };
+}
+
+// A debounced version of replaceLinksHref that scans the entire document
+const debouncedReplaceLinksHref = debounce(() => {
+    ContentParser.replaceLinksHref("aaa");
+}, 500); // Debounce by 500ms, adjust as needed
+
+function setupLinkReplacementObserver() {
+    const observer = new MutationObserver((mutations) => {
+        let shouldReplace = false;
+        for (let mutation of mutations) {
+            if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+                // Check if any of the added nodes are elements (and not just text nodes)
+                const hasElementNodes = Array.from(mutation.addedNodes).some(node => node.nodeType === Node.ELEMENT_NODE);
+                if (hasElementNodes) {
+                    shouldReplace = true;
+                    break; // No need to check further mutations for this batch
+                }
+            }
+        }
+        if (shouldReplace) {
+            print("DOM modified: New element nodes added. Triggering debounced link replacement.");
+            debouncedReplaceLinksHref();
+        }
+    });
+
+    // Configure the observer to watch for changes in the child list
+    // and descendant subtree of the body.
+    const config = { childList: true, subtree: true };
+
+    // Start observing the document body for configured mutations
+    observer.observe(document.body, config);
+    print("Started MutationObserver for link replacement.");
+}
 
 function onContentLoaded(event) {
     startUrlMonitoring();
     
     analyzeSalesforceBundle();
     
+    // Initial call to replace links
     ContentParser.replaceLinksHref("aaa");
+    
+    // Setup observer for subsequent dynamic content loads
+    setupLinkReplacementObserver();
     
     // Call the function to create the inspector panel
     createInspectorPanel(); // CORREGIDO: Ya no necesita document.body

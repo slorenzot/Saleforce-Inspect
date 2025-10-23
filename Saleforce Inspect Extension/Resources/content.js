@@ -40,32 +40,55 @@ function error(message) {
 
 print('Loaded content.js');
 
+// Global observer instance and configuration
+let linkReplacementObserver = null;
+const observerConfig = { childList: true, subtree: true };
+
 class ContentParser {
     /**
-     * Recorre todos los elementos <a> de un elemento raíz o del documento y reemplaza su atributo href.
-     * @param {string} newHrefText El nuevo texto con el que se reemplazará el href.
+     * Recorre todos los elementos <a> de un elemento raíz o del documento,
+     * y añade un prefijo a su innerHTML.
+     * @param {string} innerHTMLPrefix El texto que se añadirá al innerHTML de los enlaces.
      * @param {Element} rootElement El elemento dentro del cual se buscarán los enlaces. Si es nulo, se busca en todo el documento.
+     * @param {boolean} manageObserver Indica si el MutationObserver debe ser desconectado y reconectado durante la operación para evitar auto-triggering.
      */
-    static replaceLinksHref(text, rootElement = document) {
-        print(`Searching links within ${rootElement === document ? 'document' : 'specified element'}...`);
+    static replaceLinksHref(innerHTMLPrefix, rootElement = document, manageObserver = false) {
+        print(`Searching links within ${rootElement === document ? 'document' : 'specified element'} to prefix innerHTML...`);
         
         const allLinks = rootElement.querySelectorAll('a');
-        let replacedCount = 0;
+        let modifiedCount = 0;
 
-        print("Found links: " + allLinks.length);
+        print(`Found ${allLinks.length} links.`);
         
+        // Temporarily disconnect the observer if requested and it exists
+        if (manageObserver && linkReplacementObserver) {
+            linkReplacementObserver.disconnect();
+            print("MutationObserver temporarily disconnected.");
+        }
+
         allLinks.forEach(a => {
-            print(a);
-            if (a.hasAttribute('href') && a.href.match(/\/view$/)) {
-                print("===========================");
-                a.setAttribute('href', a.href);
-                // a.innerHTML = `* ${a.innerHTML}`
-                replacedCount++;
+            // Asumimos que queremos modificar enlaces que terminan en '/view'
+            if (a.hasAttribute('href') &&
+                a.href.match(/\/view$/) &&
+                !a.hasAttribute('inspector-role')) {
+                // Comprobar si el prefijo ya está presente para evitar duplicados
+                if (!a.innerHTML.startsWith(innerHTMLPrefix)) {
+                    a.innerHTML = `* ${a.innerHTML}`; // Aplicar el cambio de innerHTML
+                    a.setAttribute('inspector-role', 'button');
+                    
+                    modifiedCount++;
+                }
             }
         });
 
-        if (replacedCount > 0) {
-            print(`Se reemplazaron los atributos href de ${replacedCount} enlaces con: "${newHrefText}"`);
+        if (modifiedCount > 0) {
+            print(`Se modificó el innerHTML de ${modifiedCount} enlaces con el prefijo: "${innerHTMLPrefix}"`);
+        }
+        
+        // Reconnect the observer if it was temporarily disconnected and it exists
+        if (manageObserver && linkReplacementObserver) {
+            linkReplacementObserver.observe(document.body, observerConfig);
+            print("MutationObserver reconnected.");
         }
     }
 }
@@ -356,35 +379,31 @@ function debounce(func, delay) {
 
 // A debounced version of replaceLinksHref that scans the entire document
 const debouncedReplaceLinksHref = debounce(() => {
-    ContentParser.replaceLinksHref("aaa");
-}, 500); // Debounce by 500ms, adjust as needed
+    // Pasar 'true' para que `replaceLinksHref` desconecte/reconecte el observador
+    ContentParser.replaceLinksHref("SF Inspect: ", document, true);
+}, 500); // Debounce por 500ms, ajustar según sea necesario
 
 function setupLinkReplacementObserver() {
-    const observer = new MutationObserver((mutations) => {
-        let shouldReplace = false;
+    linkReplacementObserver = new MutationObserver((mutations) => {
+        let shouldTriggerDebounce = false;
         for (let mutation of mutations) {
             if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
-                // Check if any of the added nodes are elements (and not just text nodes)
                 const hasElementNodes = Array.from(mutation.addedNodes).some(node => node.nodeType === Node.ELEMENT_NODE);
                 if (hasElementNodes) {
-                    shouldReplace = true;
-                    break; // No need to check further mutations for this batch
+                    shouldTriggerDebounce = true;
+                    break;
                 }
             }
         }
-        if (shouldReplace) {
-            print("DOM modified: New element nodes added. Triggering debounced link replacement.");
+        if (shouldTriggerDebounce) {
+            print("DOM modificado: Se añadieron nuevos nodos de elementos. Activando reemplazo de enlaces con debounce.");
             debouncedReplaceLinksHref();
         }
     });
 
-    // Configure the observer to watch for changes in the child list
-    // and descendant subtree of the body.
-    const config = { childList: true, subtree: true };
-
-    // Start observing the document body for configured mutations
-    observer.observe(document.body, config);
-    print("Started MutationObserver for link replacement.");
+    // Empezar a observar el cuerpo del documento para las mutaciones configuradas
+    linkReplacementObserver.observe(document.body, observerConfig);
+    print("Iniciado MutationObserver para reemplazo de enlaces.");
 }
 
 function onContentLoaded(event) {
@@ -392,10 +411,10 @@ function onContentLoaded(event) {
     
     analyzeSalesforceBundle();
     
-    // Initial call to replace links
-    ContentParser.replaceLinksHref("aaa");
+    // Llamada inicial para reemplazar enlaces. Pasar 'true' para gestionar el observador.
+    ContentParser.replaceLinksHref("SF Inspect: ", document, true);
     
-    // Setup observer for subsequent dynamic content loads
+    // Configurar el observador para cargas de contenido dinámico subsiguientes *después* del reemplazo inicial.
     setupLinkReplacementObserver();
     
     // Call the function to create the inspector panel

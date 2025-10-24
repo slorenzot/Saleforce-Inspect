@@ -390,39 +390,45 @@ function debounce(func, delay) {
 
 // *** Nuevas funciones para mostrar y ocultar el Toast ***
 function showAnalysisToast() {
-    print("Showing analysis toast...");
-    let toastElement = document.getElementById(ANALYSIS_TOAST_ID);
+    browser.storage.local.get('showInspectorStatus').then((result) => {
+       const show = result.showInspectorStatus || false; // CORREGIDO: Asigna al switch correcto y usa la clave correcta
+        
+        if (show) {
+            print("Showing analysis toast...");
+            let toastElement = document.getElementById(ANALYSIS_TOAST_ID);
 
-    if (!toastElement) {
-        toastElement = document.createElement('div');
-        toastElement.id = ANALYSIS_TOAST_ID;
-        document.body.appendChild(toastElement);
-    }
+            if (!toastElement) {
+                toastElement = document.createElement('div');
+                toastElement.id = ANALYSIS_TOAST_ID;
+                document.body.appendChild(toastElement);
+            }
 
-    toastElement.textContent = 'Salesforce Inspector está analizando...';
-    toastElement.style.cssText = `
-        position: fixed;
-        top: 8px;
-        left: 50%;
-        transform: translateX(-50%);
-        background-color: #4A4A4A; /* Gris oscuro */
-        color: white;
-        padding: 10px 20px;
-        border-radius: 20px; /* Forma de pastilla */
-        font-family: sans-serif;
-        font-size: 14px;
-        z-index: 1001; /* Encima del panel del inspector */
-        opacity: 0;
-        transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
-        visibility: hidden;
-        white-space: nowrap; /* Evita que el texto se envuelva */
-        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    `;
+            toastElement.textContent = 'Salesforce Inspector está analizando...';
+            toastElement.style.cssText = `
+                position: fixed;
+                top: 8px;
+                left: 50%;
+                transform: translateX(-50%);
+                background-color: #4A4A4A; /* Gris oscuro */
+                color: white;
+                padding: 10px 20px;
+                border-radius: 20px; /* Forma de pastilla */
+                font-family: sans-serif;
+                font-size: 14px;
+                z-index: 1001; /* Encima del panel del inspector */
+                opacity: 0;
+                transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+                visibility: hidden;
+                white-space: nowrap; /* Evita que el texto se envuelva */
+                box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            `;
 
-    // Forzar el reflow para asegurar que la transición funcione desde el estado inicial
-    void toastElement.offsetWidth; 
-    toastElement.style.opacity = '1';
-    toastElement.style.visibility = 'visible';
+            // Forzar el reflow para asegurar que la transición funcione desde el estado inicial
+            void toastElement.offsetWidth;
+            toastElement.style.opacity = '1';
+            toastElement.style.visibility = 'visible';
+        }
+    });
 }
 
 function hideAnalysisToast() {

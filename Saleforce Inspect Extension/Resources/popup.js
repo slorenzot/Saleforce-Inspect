@@ -47,31 +47,31 @@ if (darkModeToggle) {
     console.error("El switch con ID 'darkModeToggle' no fue encontrado.");
 }
 
-// Lógica para el Modo Oscuro
+// Lógica para el Estado del Inspector
 if (showInspectorStatus) {
     // Cargar el estado guardado al iniciar el popup
     browser.storage.local.get('showInspectorStatus').then((result) => {
-        darkModeToggle.checked = result.showInspectorStatusEnabled || false;
+        showInspectorStatus.checked = result.showInspectorStatus || false; // CORREGIDO: Asigna al switch correcto y usa la clave correcta
     });
 
     // Escuchar cambios en el switch
     showInspectorStatus.addEventListener('change', () => {
         const isEnabled = showInspectorStatus.checked;
         // Guardar la preferencia en el almacenamiento local
-        browser.storage.local.set({ showInspectorStatusEnabled: isEnabled }).then(() => {
-            console.log(`Modo Oscuro guardado: ${isEnabled}`);
+        browser.storage.local.set({ showInspectorStatus: isEnabled }).then(() => { // CORREGIDO: Usa la clave correcta para guardar
+            console.log(`Estado del Inspector guardado: ${isEnabled}`); // CORREGIDO: Mensaje de log
         });
 
-        // Enviar un mensaje a las pestañas activas para aplicar/remover el modo oscuro
+        // Enviar un mensaje a las pestañas activas para aplicar/remover el estado del inspector
         // Nota: Esto solo enviará el mensaje a las pestañas activas. Para aplicarlo a las pestañas
         // que se abran después, content.js deberá leer la preferencia al cargarse.
         browser.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
             tabs.forEach((tab) => {
                 browser.tabs.sendMessage(tab.id, {
-                    type: "TOGGLE_DARK_MODE",
+                    type: "TOGGLE_INSPECTOR_STATUS", // CORREGIDO: Nuevo tipo de mensaje
                     enabled: isEnabled
                 }).catch(error => {
-                    console.error("Error al enviar mensaje TOGGLE_DARK_MODE: ", error);
+                    console.error("Error al enviar mensaje TOGGLE_INSPECTOR_STATUS: ", error);
                 });
                 // Recargar la pestaña para aplicar los cambios de estilo si es necesario
                 browser.tabs.reload(tab.id);

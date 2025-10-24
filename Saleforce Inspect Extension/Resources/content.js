@@ -32,6 +32,8 @@ const NEW_WINDOW_ICON = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="ht
     </g>
     </svg>`;
 
+const root = this;
+
 function print(messge) {
     console.log(PREFIX + ": ", messge);
 }
@@ -397,10 +399,10 @@ function showAnalysisToast() {
         document.body.appendChild(toastElement);
     }
 
-    toastElement.textContent = 'Salesforce Inspector está analizando el sitio...';
+    toastElement.textContent = 'Salesforce Inspector está analizando...';
     toastElement.style.cssText = `
         position: fixed;
-        top: 20px;
+        top: 8px;
         left: 50%;
         transform: translateX(-50%);
         background-color: #4A4A4A; /* Gris oscuro */
@@ -453,8 +455,9 @@ function setupLinkReplacementObserver() {
                 }
             }
         }
+        
         if (shouldTriggerDebounce) {
-            print("DOM modificado: Se añadieron nuevos nodos de elementos. Activando reemplazo de enlaces con debounce.");
+            print("DOM modified: Detected new nodes in DOM...");
             debouncedReplaceLinksHref();
         }
     });
@@ -466,22 +469,23 @@ function setupLinkReplacementObserver() {
 
 // A debounced version of replaceLinksHref that scans the entire document
 const debouncedReplaceLinksHref = debounce(() => {
-    showAnalysisToast(); // Muestra el toast al inicio del análisis
+    root.showAnalysisToast();
     // Pasar 'true' para que `replaceLinksHref` desconecte/reconecte el observador
     ContentParser.replaceLinksHref("SF Inspect: ", document, true);
-    hideAnalysisToast(); // Oculta el toast al finalizar el análisis
+    
+    setTimeout(() => root.hideAnalysisToast(), 800);
 }, 500); // Debounce por 500ms, ajustar según sea necesario
 
 function onContentLoaded(event) {
-    showAnalysisToast();
+//    showAnalysisToast();
     
     startUrlMonitoring();
     
     analyzeSalesforceBundle();
     
-    showAnalysisToast(); // Muestra el toast para la carga inicial
-    // Llamada inicial para reemplazar enlaces. Pasar 'true' para gestionar el observador.
-    ContentParser.replaceLinksHref("SF Inspect: ", document, true);
+//    showAnalysisToast(); // Muestra el toast para la carga inicial
+//    // Llamada inicial para reemplazar enlaces. Pasar 'true' para gestionar el observador.
+//    ContentParser.replaceLinksHref("SF Inspect: ", document, true);
     
     // Configurar el observador para cargas de contenido dinámico subsiguientes *después* del reemplazo inicial.
     setupLinkReplacementObserver();

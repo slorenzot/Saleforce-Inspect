@@ -13,38 +13,56 @@
         <strong>Welcome to Salesforce Inspect!</strong>
         <p>New way to develop in Salesforce using your Safari!</p>
         
+        <div class="popup-description">
+            Salesforce Inspect is active, and all configurations or settings apply to all Salesforce web pages. For example: *.salesforce.com, *.salesforce-setup.com, *.force.com, etc.
+        </div>
+        
         <div class="popup-signup-features-missing">
-            Salesforce Inspect is active, but key features are missing.
+            Salesforce Inspect is active, and all configurations or settings apply to all Salesforce web pages. For example: *.salesforce.com, *.salesforce-setup.com, *.force.com, etc.
         </div>
-        
-        <div class="popup-signup-features">
-            <div class="popup-signup-features-title">
-                Sign up now to unlock the following:
+       
+       <div class="popup-signup-panel">
+            <div class="popup-signup-features">
+                <div class="popup-signup-features-title">
+                    Sign up now to unlock the following:
+                </div>
+                <ul>
+                    <li class="popup-signup-features-item">Save and access you workflows</li>
+                    <li class="popup-signup-features-item">Create personal toolboxes</li>
+                    <li class="popup-signup-features-item">Create custom settings</li>
+                </ul>
             </div>
-            <ul>
-                <li class="popup-signup-features-item">Save and access you workflows</li>
-                <li class="popup-signup-features-item">Create personal toolboxes</li>
-                <li class="popup-signup-features-item">Create custom settings</li>
-            </ul>
+            
+            <button id="sign_in_button" class="popup-signup-button">
+                <strong>
+                Sign up
+                </strong>
+            </button>
+            <div class="popup-signup-hint">
+                Already have an account? <a href="#" class="popup-signup-signin">Sign in</a>
+            </div>
         </div>
         
-        <button id="sign_in_button" class="popup-signup-button">
-            <strong>
-            Sign up
-            </strong>
-        </button>
-        <div class="popup-signup-hint">
-            Already have an account? <a href="#" class="popup-signup-signin">Sign in</a>
+        <label for="darkModeToggle" style="text-align: left;">
+            Settingss
+        </label>
+        <div class="dark-mode-toggle-container">
+            <label for="darkModeToggle" style="text-align: left;">
+                Mostrar estado <br/>
+                <span style="font-size: 10px;">Alerta cuando el Inspector esta analizando</span>
+            </label>
+            <input type="checkbox" id="showInspectorStatus">
         </div>
 
         <!-- Nuevo Switch para Modo Oscuro -->
         <div class="dark-mode-toggle-container">
             <label for="darkModeToggle" style="text-align: left;">
-                Modo oscuro en páginas<br/>
+                Modo oscuro<br/>
                 <span style="font-size: 10px;">Requiere recargar el contenido de las pestañas</span>
             </label>
             <input type="checkbox" id="darkModeToggle">
         </div>
+        
     </div>
 </body>
 </html>

@@ -23,6 +23,15 @@ p {
     text-align: center;
 }
 
+.popup-description {
+    text-align: left;
+    padding: 10px;
+    width: 94%;
+    font-size: 12px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
 
 .popup-signup-features-missing {
     text-align: left;
@@ -34,6 +43,11 @@ p {
     margin-bottom: 20px;
     border: solid 1px;
     border-radius: 10px;
+    display: none;
+}
+
+.popup-signup-panel {
+    display: none;
 }
 
 .popup-signup-features {

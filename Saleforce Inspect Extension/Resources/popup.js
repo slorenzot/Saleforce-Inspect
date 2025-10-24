@@ -2,6 +2,7 @@ console.log('Loaded popup.js');
 
 const signInButton = document.getElementById("sign_in_button");
 const darkModeToggle = document.getElementById("darkModeToggle"); // Referencia al nuevo switch
+const showInspectorStatus = document.getElementById("showInspectorStatus");
 
 if (signInButton) {
     signInButton.addEventListener('click', function() {
@@ -44,4 +45,39 @@ if (darkModeToggle) {
     });
 } else {
     console.error("El switch con ID 'darkModeToggle' no fue encontrado.");
+}
+
+// Lógica para el Modo Oscuro
+if (showInspectorStatus) {
+    // Cargar el estado guardado al iniciar el popup
+    browser.storage.local.get('showInspectorStatus').then((result) => {
+        darkModeToggle.checked = result.showInspectorStatusEnabled || false;
+    });
+
+    // Escuchar cambios en el switch
+    showInspectorStatus.addEventListener('change', () => {
+        const isEnabled = showInspectorStatus.checked;
+        // Guardar la preferencia en el almacenamiento local
+        browser.storage.local.set({ showInspectorStatusEnabled: isEnabled }).then(() => {
+            console.log(`Modo Oscuro guardado: ${isEnabled}`);
+        });
+
+        // Enviar un mensaje a las pestañas activas para aplicar/remover el modo oscuro
+        // Nota: Esto solo enviará el mensaje a las pestañas activas. Para aplicarlo a las pestañas
+        // que se abran después, content.js deberá leer la preferencia al cargarse.
+        browser.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
+            tabs.forEach((tab) => {
+                browser.tabs.sendMessage(tab.id, {
+                    type: "TOGGLE_DARK_MODE",
+                    enabled: isEnabled
+                }).catch(error => {
+                    console.error("Error al enviar mensaje TOGGLE_DARK_MODE: ", error);
+                });
+                // Recargar la pestaña para aplicar los cambios de estilo si es necesario
+                browser.tabs.reload(tab.id);
+            });
+        });
+    });
+} else {
+    console.error("El switch con ID 'showInspectorStatus' no fue encontrado.");
 }

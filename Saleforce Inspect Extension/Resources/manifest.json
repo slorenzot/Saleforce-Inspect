@@ -21,7 +21,7 @@
     },
 
     "content_scripts": [{
-        "js": [ "content.js" ],
+        "js": [ "common.js", "toolkit.js", "content.js" ],
         "matches": [
             "*://*.salesforce.com/*",
             "*://*.salesforce-setup.com/*",

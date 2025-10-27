@@ -1,4 +1,3 @@
-const PREFIX = "SF Inspect";
 const DARK_MODE_STYLE_ID = 'salesforce-inspect-dark-mode-style';
 
 // Nuevas constantes para el panel del inspector
@@ -32,16 +31,8 @@ const NEW_WINDOW_ICON = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="ht
     </g>
     </svg>`;
 
-const root = this;
 
-function print(messge) {
-    console.log(PREFIX + ": ", messge);
-}
-
-function error(message) {
-    console.error(PREFIX + ": ", messge);
-}
-
+print(`Is sandbox=${isSandbox()}`)
 print('Loaded content.js');
 
 // Global observer instance and configuration

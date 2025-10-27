@@ -62,21 +62,21 @@ if (showInspectorStatus) {
             console.log(`Estado del Inspector guardado: ${isEnabled}`); // CORREGIDO: Mensaje de log
         });
 
-        // Enviar un mensaje a las pestañas activas para aplicar/remover el estado del inspector
-        // Nota: Esto solo enviará el mensaje a las pestañas activas. Para aplicarlo a las pestañas
-        // que se abran después, content.js deberá leer la preferencia al cargarse.
-        browser.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
-            tabs.forEach((tab) => {
-                browser.tabs.sendMessage(tab.id, {
-                    type: "TOGGLE_INSPECTOR_STATUS", // CORREGIDO: Nuevo tipo de mensaje
-                    enabled: isEnabled
-                }).catch(error => {
-                    console.error("Error al enviar mensaje TOGGLE_INSPECTOR_STATUS: ", error);
-                });
-                // Recargar la pestaña para aplicar los cambios de estilo si es necesario
-                browser.tabs.reload(tab.id);
-            });
-        });
+//        // Enviar un mensaje a las pestañas activas para aplicar/remover el estado del inspector
+//        // Nota: Esto solo enviará el mensaje a las pestañas activas. Para aplicarlo a las pestañas
+//        // que se abran después, content.js deberá leer la preferencia al cargarse.
+//        browser.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
+//            tabs.forEach((tab) => {
+//                browser.tabs.sendMessage(tab.id, {
+//                    type: "TOGGLE_INSPECTOR_STATUS", // CORREGIDO: Nuevo tipo de mensaje
+//                    enabled: isEnabled
+//                }).catch(error => {
+//                    console.error("Error al enviar mensaje TOGGLE_INSPECTOR_STATUS: ", error);
+//                });
+//                // Recargar la pestaña para aplicar los cambios de estilo si es necesario
+//                browser.tabs.reload(tab.id);
+//            });
+//        });
     });
 } else {
     console.error("El switch con ID 'showInspectorStatus' no fue encontrado.");

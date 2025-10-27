@@ -92,16 +92,15 @@ p {
     border-top: 1px solid #eee;
 }
 
-/* En popup.css */
-    .dark-mode-toggle-container {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding-top: 10px;
-    }
+.toggle-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 10px;
+}
 
-    .dark-mode-toggle-container label {
-        font-size: 12px;
-        margin-right: 10px;
-        font-weight: normal; /* O ajusta a tu estilo */
-    }
+.toggle-container label {
+    font-size: 12px;
+    margin-right: 10px;
+    font-weight: normal; /* O ajusta a tu estilo */
+}
